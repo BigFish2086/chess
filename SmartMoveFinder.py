@@ -5,6 +5,10 @@ import random
 pieceScore = {"K": 0, "Q": 10, "R": 5, "B": 3, "N": 3, "p": 1}
 CHECKMATE = 1000
 STALEMATE = 0
+# represents how many moves the computer should look ahead
+# before deciding on its best move
+MAX_DEPTH = 2
+nextMove = None
 
 
 """
@@ -18,60 +22,81 @@ def findRandomMoves(validMoves):
 
 
 """
-this is should be the method we use to find the
-AI best move using a greed-material appraoch
-the goals of our AI is to make the socring is as
-positive as possible if it playes white and as negative
-as possible if it playes black
+this is a helper method to make the first calls
+for the actual algorithm
 """
 
 
-def findBestMove(gs, validMoves):
-    # to alternate between the white and black
-    bestPlayerMove = None
-    opponentMinMaxScore = CHECKMATE
-    turnMultiplier = 1 if gs.whiteToMove else -1
-    random.shuffle(validMoves)
-    for playerMove in validMoves:
-        gs.makeMove(playerMove)
-        opponentMoves = gs.getValidMoves()
-        if gs.stalemate:
-            opponentMaxScore = STALEMATE
-        elif gs.checkmate:
-            opponentMaxScore = -CHECKMATE
+def findBestMoveMinMax(gs, validMoves):
+    global nextMove
+    nextMove = None
+    findMoveMinMax(gs, validMoves, MAX_DEPTH, gs.whiteToMove)
+    return nextMove
+
+
+"""
+a much better way to find a move based
+on the idea of MinMax that's almost
+could be applied to any zero-sum game
+"""
+
+
+def findMoveMinMax(gs, validMoves, depth, whiteToMove):
+    global nextMove
+    # first we need to check if we hit any of our terminal conditions
+    if depth == 0:
+        return scoreBoard(gs)
+    # if not any of our base cases we can now check each player's turn
+    # and try to apply the algorithm for each of them
+    if whiteToMove:
+        maxScore = -CHECKMATE
+        for move in validMoves:
+            gs.makeMove(move)
+            nextMoves = gs.getValidMoves()
+            score = findMoveMinMax(gs, nextMoves, depth - 1, False)
+            if score > maxScore:
+                maxScore = score
+                if depth == MAX_DEPTH:
+                    nextMove = move
+            gs.undoMove()
+        return maxScore
+    else:
+        minScore = CHECKMATE
+        for move in validMoves:
+            gs.makeMove(move)
+            nextMoves = gs.getValidMoves()
+            score = findMoveMinMax(gs, nextMoves, depth - 1, True)
+            if score < minScore:
+                minScore = score
+                if depth == MAX_DEPTH:
+                    nextMove = move
+            gs.undoMove()
+        return minScore
+
+
+"""
+a little bit more instructive score board method instead of
+the naive solution that's implemented in scoreMaterial()
+notes:
+ 1. postive score is good for white and negative score is good for black
+"""
+
+
+def scoreBoard(gs):
+    # checking for those two basic cases here instead of doing
+    # that in the findMoveMinMax()
+    if gs.checkmate:
+        if gs.whiteToMove:
+            return -CHECKMATE  # black wins
         else:
-            opponentMaxScore = -CHECKMATE
-            for opponentMove in opponentMoves:
-                gs.makeMove(opponentMove)
-                gs.getValidMoves()
-                if gs.checkmate:
-                    score = CHECKMATE
-                elif gs.stalemate:
-                    score = STALEMATE
-                else:
-                    score = -turnMultiplier * scoreMaterial(gs.board)
-                if score > opponentMaxScore:
-                    opponentMaxScore = score
-                gs.undoMove()
-        if opponentMaxScore < opponentMinMaxScore:
-            opponentMinMaxScore = opponentMaxScore
-            bestPlayerMove = playerMove
-        gs.undoMove()
-    return bestPlayerMove
-
-
-"""
-Score the board based on the material
-"""
-
-
-def scoreMaterial(board):
+            return CHECKMATE  # white wins
+    elif gs.stalemate:
+        return STALEMATE
     score = 0
-    for row in board:
+    for row in gs.board:
         for square in row:
             if square[0] == "w":
                 score += pieceScore[square[1]]
             elif square[0] == "b":
                 score -= pieceScore[square[1]]
     return score
-
