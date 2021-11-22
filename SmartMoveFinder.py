@@ -30,48 +30,30 @@ for the actual algorithm
 def findBestMoveMinMax(gs, validMoves):
     global nextMove
     nextMove = None
-    findMoveMinMax(gs, validMoves, MAX_DEPTH, gs.whiteToMove)
+    findMoveNegaMax(gs, validMoves, MAX_DEPTH, 1 if gs.whiteToMove else -1)
     return nextMove
 
 
 """
-a much better way to find a move based
-on the idea of MinMax that's almost
-could be applied to any zero-sum game
+implementing the nega-max algorithm
 """
 
 
-def findMoveMinMax(gs, validMoves, depth, whiteToMove):
+def findMoveNegaMax(gs, validMoves, depth, turnMultiplier):
     global nextMove
-    # first we need to check if we hit any of our terminal conditions
     if depth == 0:
-        return scoreBoard(gs)
-    # if not any of our base cases we can now check each player's turn
-    # and try to apply the algorithm for each of them
-    if whiteToMove:
-        maxScore = -CHECKMATE
-        for move in validMoves:
-            gs.makeMove(move)
-            nextMoves = gs.getValidMoves()
-            score = findMoveMinMax(gs, nextMoves, depth - 1, False)
-            if score > maxScore:
-                maxScore = score
-                if depth == MAX_DEPTH:
-                    nextMove = move
-            gs.undoMove()
-        return maxScore
-    else:
-        minScore = CHECKMATE
-        for move in validMoves:
-            gs.makeMove(move)
-            nextMoves = gs.getValidMoves()
-            score = findMoveMinMax(gs, nextMoves, depth - 1, True)
-            if score < minScore:
-                minScore = score
-                if depth == MAX_DEPTH:
-                    nextMove = move
-            gs.undoMove()
-        return minScore
+        return turnMultiplier * scoreBoard(gs)
+    maxScore = -CHECKMATE
+    for move in validMoves:
+        gs.makeMove(move)
+        nextMoves = gs.getValidMoves()
+        score = -findMoveNegaMax(gs, nextMoves, depth - 1, -turnMultiplier)
+        if score > maxScore:
+            maxScore = score
+            if depth == MAX_DEPTH:
+                nextMove = move
+        gs.undoMove()
+    return maxScore
 
 
 """
