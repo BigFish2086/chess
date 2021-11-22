@@ -32,9 +32,10 @@ feel free to contribute :grinning:
 - [ ] Change color of board/pieces - different piece skins.
 
 ## Instructions
-1. Clone this repository.
-2. Run `ChessMain.py`.
-3. Enjoy the game!
+1. Clone this repository 
+2. Run `python3 -m pip install -r ./requirements.txt`
+3. Run `python3 ChessMain.py`.
+4. Enjoy the game!
 
 #### keys:
 * Press `z` to undo a move.
