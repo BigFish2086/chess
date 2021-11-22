@@ -54,6 +54,7 @@ def loadImages():
 
 def main():
     p.init()
+    p.display.set_caption("Chess")
     screen = p.display.set_mode((BOARD_WIDTH + MOVE_LOG_PANEL_WIDTH, BOARD_HEIGHT))
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
@@ -75,7 +76,7 @@ def main():
     # if a human is playing, then this will be true
     # and if an AI is playing it'll be false
     playerOne = True  # for white side
-    playerTwo = False  # for black side
+    playerTwo = True  # for black side
     AIThinking = False
     moveFinderProcess = None
     moveUndone = False
