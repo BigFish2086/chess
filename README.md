@@ -39,9 +39,12 @@ feel free to contribute :grinning:
 
 ![PvP Chess Game with move logger](./assets/baord01.png)
 
-#### keys:
+#### Keys:
 * Press `z` to undo a move.
 * Press `r` to reset the game.
+
+#### Notes: 
+* For now, the game runs with PvP mode enabled.
 
 ## Further development ideas
 1. Move ordering - look at checks, captures and threats first, prioritize castling/king safety, look at pawn moves last (this will improve alpha-beta pruning). Also start with moves that previously scored higher (will also improve pruning).
